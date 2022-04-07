@@ -63,7 +63,7 @@ def post_create(request):
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
-            post.pub_date = datetime.datetime.today()
+            post.pub_date = datetime.datetime.now()
             form.save()
             return redirect('posts:profile', request.user)
         return render(request, 'posts/create_post.html', {'form': form})
