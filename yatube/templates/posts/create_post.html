@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %} Новый пост {% endblock %}
+{% block title %} Создание поста {% endblock %}
 {% block content %}
       <div class="container py-5">
         <div class="row justify-content-center">
@@ -12,7 +12,7 @@
                 <form method="post" action="
 
                   {% if is_edit %}
-                    {% url 'posts:post_edit' post.pk %} 
+                    {% url 'posts:post_edit' post.pk%} 
                   {% else %}
                     {% url 'posts:post_create' %}
                   {% endif %}
@@ -44,7 +44,7 @@
                   </div>
                   <div class="d-flex justify-content-end">
                     <button type="submit" class="btn btn-primary">
-                      Добавить
+                      Создать
                     </button>
                   </div>
                 </form>
@@ -53,7 +53,4 @@
           </div>
         </div>
       </div>
-    </main>
-  </body>
-</html>
 {% endblock %}

@@ -3,8 +3,8 @@ from .models import Post, Group
 from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
 from .forms import PostForm
-import datetime
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 
 
 User = get_user_model()
@@ -21,7 +21,7 @@ def index(request):
 def group_posts(request, slug):
     """Выводит шаблон с группами постов"""
     group = get_object_or_404(Group, slug=slug)
-    posts = group.posts.all()[:10]
+    posts = group.posts.all()[:settings.SHOWED_POSTS]
     context = {
         'group': group,
         'posts': posts,
@@ -46,7 +46,7 @@ def post_detail(request, post_id):
 
 
 def get_page_context(queryset, request):
-    paginator = Paginator(queryset, 10)
+    paginator = Paginator(queryset, settings.SHOWED_POSTS)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return {
@@ -63,7 +63,6 @@ def post_create(request):
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
-            post.pub_date = datetime.datetime.now()
             form.save()
             return redirect('posts:profile', request.user)
         return render(request, 'posts/create_post.html', {'form': form})
@@ -73,30 +72,17 @@ def post_create(request):
 
 @login_required
 def post_edit(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(Post, id=post_id, author=request.user)
     if request.method == 'POST':
-        form = PostForm(request.POST, instance=post)
+        form = PostForm(request.POST or None, instance=post)
         if form.is_valid():
-            post.text = form.cleaned_data['text']
-            post.group = form.cleaned_data['group']
-            post.author = request.user
+            post = form.save(commit=False)
             post.save()
             return redirect('posts:post_detail', post_id=post_id)
-        else:
-            context = {
-                'form': form,
-                'post': post,
-                'is_edit': True,
-            }
-            return render(request, 'posts/create_post.html', context)
-    else:
-        if request.user == post.author:
-            form = PostForm(instance=post)
-            context = {
-                'form': form,
-                'post': post,
-                'is_edit': True
-            }
-            return render(request, 'posts/create_post.html', context)
-        else:
-            return redirect('posts:post_detail', post_id=post_id)
+    form = PostForm(request.POST or None, instance=post)
+    context = {
+        'form': form,
+        'post': post,
+        'is_edit': True,
+    }
+    return render(request, 'posts/create_post.html', context)
