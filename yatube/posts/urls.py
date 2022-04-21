@@ -4,9 +4,10 @@ from . import views
 app_name = 'posts'
 
 urlpatterns = [
-    path('group/<slug:slug>/', views.group_posts, name='group_list'),
     # Главная страница
     path('', views.index, name='index'),
+    # Cписок групп
+    path('group/<slug:slug>/', views.group_posts, name='group_list'),
     # Профайл пользователя
     path('profile/<str:username>/', views.profile, name='profile'),
     # Просмотр записи
